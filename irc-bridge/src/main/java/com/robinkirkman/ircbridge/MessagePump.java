@@ -8,6 +8,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.pircbotx.Channel;
 import org.pircbotx.PircBotX;
 import org.pircbotx.User;
 import org.pircbotx.hooks.Event;
@@ -159,8 +160,12 @@ public class MessagePump {
 				h.handle(this, event);
 			if(!muted && endpointEventPublishers.containsKey(event.getClass())) {
 				User user = Util.invokeGetter(User.class, "getUser", event, null);
-				if(user == null || !user.getNick().equals(bot.getUserBot().getNick()))
-					MessagePump.this.publish(this, event);
+				Channel channel = Util.invokeGetter(Channel.class, "getChannel", event, null);
+				if(user != null && user.getNick().equals(bot.getUserBot().getNick()))
+					return;
+				if(channel != null && !channel.getName().equals(this.channel))
+					return;
+				MessagePump.this.publish(this, event);
 			}
 		}
 		
