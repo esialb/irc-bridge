@@ -159,10 +159,7 @@ public class MessagePump {
 			if(h != null)
 				h.handle(this, event);
 			if(!muted && endpointEventPublishers.containsKey(event.getClass())) {
-				User user = Util.invokeGetter(User.class, "getUser", event, null);
 				Channel channel = Util.invokeGetter(Channel.class, "getChannel", event, null);
-				if(user != null && user.getNick().equals(bot.getUserBot().getNick()))
-					return;
 				if(channel != null && !channel.getName().equals(this.channel))
 					return;
 				MessagePump.this.publish(this, event);
