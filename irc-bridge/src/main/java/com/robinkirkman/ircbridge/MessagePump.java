@@ -157,8 +157,11 @@ public class MessagePump {
 			EndpointEventHandler<Event> h = (EndpointEventHandler<Event>) endpointEventHandlers.get(event.getClass());
 			if(h != null)
 				h.handle(this, event);
-			if(!muted && endpointEventPublishers.containsKey(event.getClass()))
-				MessagePump.this.publish(this, event);
+			if(!muted && endpointEventPublishers.containsKey(event.getClass())) {
+				User user = Util.invokeGetter(User.class, "getUser", event, null);
+				if(user == null || !user.getNick().equals(bot.getUserBot().getNick()))
+					MessagePump.this.publish(this, event);
+			}
 		}
 		
 		public String getName() {
