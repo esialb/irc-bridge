@@ -16,7 +16,7 @@ import org.pircbotx.PircBotX;
 public class Main {
 	private static final Options OPT = new Options();
 	static {
-		OPT.addOption("e", "endpoint", true, "<name>:<nick>:<server>:<channel>");
+		OPT.addOption("e", "endpoint", true, "<name>:<nick>:<channel>:<server>[:<port>[:<password>]]");
 		OPT.addOption("m", "mute", true, "<name>");
 		OPT.addOption("n", "netsplit", false, "netsplit mode");
 	}
@@ -28,11 +28,6 @@ public class Main {
 		if((v = cli.getOptionValues("endpoint")) == null || v.length < 2)
 			throw new IllegalArgumentException("must supply at least 2 --endpoint=");
 		
-		for(String earg : cli.getOptionValues("endpoint")) {
-			if(earg.split(":").length != 4)
-				throw new IllegalArgumentException("--endpoint=" + earg);
-		}
-		
 		String[] m = cli.getOptionValues("muted");
 		Set<String> muted = (m == null) ? Collections.emptySet() : new HashSet<>(Arrays.asList(m));
 		
@@ -42,13 +37,15 @@ public class Main {
 		Collection<Thread> botThreads = new ArrayList<>();
 		
 		for(String earg : cli.getOptionValues("endpoint")) {
-			String[] f = earg.split(":");
+			String[] f = earg.split(":", 6);
 			String name = f[0];
 			String nick = f[1];
-			String host = f[2];
-			String channel = f[3];
+			String channel = f[2];
+			String host = f[3];
+			int port = Integer.parseInt(f.length >= 5 ? f[4] : "6667");
+			String password = (f.length == 6) ? f[5] : null;
 			
-			PircBotX bot = new PircBotX(createConfiguration(nick, host, channel));
+			PircBotX bot = new PircBotX(createConfiguration(nick, channel, host, port, password));
 			
 			Thread t = new Thread(() -> Util.quietlyRun(() -> bot.startBot()));
 			t.setDaemon(false);
@@ -62,9 +59,11 @@ public class Main {
 			t.start();
 	}
 	
-	private static Configuration createConfiguration(String nick, String host, String channel) {
+	private static Configuration createConfiguration(String nick, String channel, String host, int port, String password) {
 		Configuration.Builder builder = new Configuration.Builder();
-		builder.addServer(host);
+		builder.addServer(new Configuration.ServerEntry(host, port));
+		if(password != null)
+			builder.setServerPassword(password);
 		builder.setName(nick);
 		builder.setLogin(nick);
 		builder.addAutoJoinChannel(channel);
