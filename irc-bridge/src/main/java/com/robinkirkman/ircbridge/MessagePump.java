@@ -109,7 +109,7 @@ public class MessagePump {
 		private String name;
 		private PircBotX bot;
 		private String channel;
-		boolean muted;
+		private boolean muted;
 		private Executor dispatcher;
 		private AtomicBoolean ready = new AtomicBoolean(false);
 		

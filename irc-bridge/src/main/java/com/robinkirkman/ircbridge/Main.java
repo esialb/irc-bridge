@@ -28,7 +28,7 @@ public class Main {
 		if((v = cli.getOptionValues("endpoint")) == null || v.length < 2)
 			throw new IllegalArgumentException("must supply at least 2 --endpoint=");
 		
-		String[] m = cli.getOptionValues("muted");
+		String[] m = cli.getOptionValues("mute");
 		Set<String> muted = (m == null) ? Collections.emptySet() : new HashSet<>(Arrays.asList(m));
 		
 		MessagePump pump = new MessagePump();
